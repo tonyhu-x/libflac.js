@@ -1,4 +1,26 @@
 // libflac.js - port of libflac to JavaScript using emscripten
+(function (root, factory) {
+
+	if (typeof define === 'function' && define.amd) {
+		// AMD. Register as an anonymous module.
+		define(['module', 'require'], factory.bind(null, root));
+	} else if (typeof module === 'object' && module.exports) {
+		// Node. Does not work with strict CommonJS, but
+		// only CommonJS-like environments that support module.exports,
+		// like Node.
+
+		// use process.env (if available) for reading Flac environment settings:
+		var env = typeof process !== 'undefined' && process && process.env? process.env : root;
+		factory(env, module, module.require);
+	} else {
+		// Browser globals
+		root.Flac = factory(root);
+	}
+
+}(typeof self !== 'undefined' ? self : typeof window !== 'undefined' ? window : this, function (global, expLib, require) {
+'use strict';
+
+var Module = Module || {}
 
 /**
  * Decoding error codes.

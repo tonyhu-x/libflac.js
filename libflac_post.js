@@ -2569,27 +2569,30 @@ FLAC__bool 	FLAC__stream_decoder_skip_single_frame (FLAC__StreamDecoder *decoder
 
 };//END: var _exported = {
 
-export const {
-  setOptions, getOptions, isReady, on, off, FLAC__stream_encoder_set_verify,
-  FLAC__stream_encoder_set_compression_level, FLAC__stream_encoder_set_blocksize,
-  FLAC__stream_encoder_get_verify_decoder_state, FLAC__stream_encoder_get_verify,
-  create_libflac_encoder, init_libflac_encoder, create_libflac_decoder,
-  init_libflac_decoder, init_encoder_stream, init_encoder_ogg_stream,
-  init_decoder_stream, init_decoder_ogg_stream, FLAC__stream_encoder_process_interleaved,
-  FLAC__stream_encoder_process, FLAC__stream_decoder_process_single,
-  FLAC__stream_decoder_process_until_end_of_stream,
-  FLAC__stream_decoder_process_until_end_of_metadata,
-  FLAC__stream_decoder_get_state, FLAC__stream_encoder_get_state,
-  FLAC__stream_decoder_set_metadata_respond,
-  FLAC__stream_decoder_set_metadata_respond_application,
-  FLAC__stream_decoder_set_metadata_respond_all,
-  FLAC__stream_decoder_set_metadata_ignore,
-  FLAC__stream_decoder_set_metadata_ignore_application,
-  FLAC__stream_decoder_set_metadata_ignore_all,
-  FLAC__stream_encoder_set_metadata,
-  _create_pointer_array, _destroy_pointer_array,
-  FLAC__stream_decoder_get_md5_checking, FLAC__stream_decoder_set_md5_checking,
-  FLAC__stream_encoder_finish, FLAC__stream_decoder_finish,
-  FLAC__stream_decoder_reset, FLAC__stream_encoder_delete,
-  FLAC__stream_decoder_delete,
-} = _exported;
+//if Properties are supported by JS execution environment:
+// support "immediate triggering" onready function, if library is already initialized when setting onready callback
+if(typeof Object.defineProperty === 'function'){
+	//add internal field for storing onready callback:
+	_exported._onready = void(0);
+	//define getter & define setter with "immediate trigger" functionality:
+	Object.defineProperty(_exported, 'onready', {
+		get() { return this._onready; },
+		set(newValue) {
+			this._onready = newValue;
+			if(newValue && this.isReady()){
+				check_and_trigger_persisted_event('ready', newValue);
+			}
+		}
+	});
+} else {
+	//if Properties are NOTE supported by JS execution environment:
+	// pring usage warning for onready hook instead
+	console.warn('WARN: note that setting Flac.onready handler after Flac.isReady() is already true, will have no effect, that is, the handler function will not be triggered!');
+}
+
+if(expLib && expLib.exports){
+	expLib.exports = _exported;
+}
+return _exported;
+
+}));//END: UMD wrapper
